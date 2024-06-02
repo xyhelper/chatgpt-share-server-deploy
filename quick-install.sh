@@ -3,7 +3,7 @@ set -e
 
 ## 克隆仓库到本地
 echo "clone repository..."
-git clone -b deploy  --depth=1 https://github.com/xyhelper/chatgpt-share-server.git chatgpt-share
+git clone -b deploy  --depth=1 https://github.com/xyhelper/chatgpt-share-server-deploy.git chatgpt-share
 
 ## 进入目录
 cd chatgpt-share
