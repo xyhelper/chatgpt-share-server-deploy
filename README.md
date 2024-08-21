@@ -26,3 +26,8 @@ curl -sSfL https://raw.githubusercontent.com/xyhelper/chatgpt-share-server-deplo
 ## 文档
 
 [https://chatgpt-share-server.xyhelper.cn](https://chatgpt-share-server.xyhelper.cn)
+
+
+## 交流群
+
+![交流群](https://xyhelper.cn/xyhelper-kf-2-0828.png)
