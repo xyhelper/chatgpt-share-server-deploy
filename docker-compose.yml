@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   mysql:
     image: mysql:8
@@ -45,8 +44,15 @@ services:
     # ports:
     #   - 9611:8080
     environment:
-      LIMIT: 40  # 限制每个userToken允许的次数
-      PER: "3h" # 限制周期 1s, 1m, 1h, 1d, 1w, 1y
+      OAIKEY: "" # OpenAI API key 用于内容审核
+      AUTO: "200/3h"
+      TEXT-DAVINCI-002-RENDER-SHA: "200/3h"
+      GPT-4O-MINI: "200/3h"
+      GPT-4O: "60/3h"
+      GPT-4: "20/3h"
+      GPT-4O-CANMORE: "30/3h"
+      O1-PREVIEW: "7/24h"
+      O1-MINI: "50/24h" # 模型名称: "次数/时间" 时间单位: h(小时) m(分钟) s(秒)  模型名称要改成大写
     labels:
       - "com.centurylinklabs.watchtower.scope=xyhelper-chatgpt-share-server"
   watchtower:
