@@ -6,14 +6,8 @@
 
 ### 本服务为商业服务，自2024年4月16日0:00不再提供免费接入点。需付费使用。
 
-1.流量大使用付费接入点或者小流量拼车付费接入点的，可打开以下链接选择适合自己的方案
+流量大使用付费接入点或者小流量拼车付费接入点的，可打开以下链接选择适合自己的方案：
 https://xyhelper.cn/access
-
-2.流量小或者小团队自用的，可使用蟑螂v1，目前蟑螂v1可正常使用，了解详情请访问:
-CockroachAi（又名蟑螂）
-https://github.com/cockroachai/cockroachai
-
-
 
 ## 部署
 
@@ -201,9 +195,6 @@ rm docker-compose.yml.bak config.yaml.bak
 - [安装指南](./docs/install/README.md) —— 前置条件、系统优化、部署、反向代理、管理后台、常用管理命令与升级
 - [配置指南](./docs/config/README.md) —— 常用环境变量一览，以及限流、备份、多端登录、语音、OAuth 等专题
 - [界面预览](./docs/preview/README.md)
+- [变更日志](./CHANGELOG.md) —— 影响部署步骤、配置项与升级操作的版本变更
 
 `docker-compose.yml` 与 `config.yaml` 里也有对应的行内注释。
-
-## 交流群
-
-![交流群](https://xyhelper.cn/xyhelper-kf-2-0828.png)
