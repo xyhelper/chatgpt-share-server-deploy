@@ -112,7 +112,8 @@ services:
     image: xyhelper/auditlimit
     restart: always
     # 只由 chatgpt-share-server 在容器网络内调用,默认不对外暴露。
-    # 需要本机调试时可打开(容器内固定监听 8080,不要设置 PORT):
+    # 需要本机调试时可去掉下面两行的注释(容器内固定监听 8080,不要设置 PORT):
+    # ports:
     #   - 127.0.0.1:9611:8080
     volumes:
       # 挂载后可用 data/auditlimit/keywords.txt 逐行配置禁止词,文件为空则该功能不启用
