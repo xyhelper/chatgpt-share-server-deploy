@@ -53,7 +53,7 @@ docker compose up -d chatgpt-web-ui
 | `chatgpt-share-server` | `8300` → 容器 `8001` | 车队/账号数据、旧版页面、管理后台 |
 | `chatgpt-file-deletion` | `9900` → 容器 `8001` | 库文件清理服务，管理页 `/gpt.html` |
 | `mysql` / `redis` | 不对外暴露 | 数据存储（`./data/`）；`redis` 同时提供清理服务的任务队列 |
-| `auditlimit` | 不对外暴露 | 内容审核与频率限制 |
+| `auditlimit` | 不对外暴露 | 按「用户 token + 模型」限流，可选叠加内容审核 |
 | `watchtower` | — | 按 `scope` 标签自动升级上述容器镜像 |
 
 ### 库文件清理（可选但推荐）
@@ -70,6 +70,34 @@ docker compose up -d chatgpt-web-ui
 
 不想使用该服务的话，注释掉 `docker-compose.yml` 中整个 `chatgpt-file-deletion` 服务，
 并删除 `chatgpt-share-server` 的 `LIBCLEANUPSERVER` 环境变量即可。
+
+### 内容审核与频率限制
+
+`auditlimit` 按「用户 token + 模型」两个维度分别限流，由 `chatgpt-share-server` 通过
+环境变量 `AUDIT_LIMIT_URL` 调用，全新部署已预先接通，无需额外配置。
+
+限流值写在 `docker-compose.yml` 中 `auditlimit` 的 `environment` 里，格式为 `次数/时间`：
+
+```yaml
+# 兜底值:未单独配置的模型都用这一项
+DEFAULT: "20/3h"
+# 模型 gpt-5-6 单独放宽到每 3 小时 60 次
+GPT-5-6: "60/3h"
+```
+
+- 配置键的生成规则：模型名**转为大写**，并把 `.` 换成 `_`
+  （`gpt-5.6-sol-wm` → `GPT-5_6-SOL-WM`）
+- 时间单位支持 `s` / `m` / `h`，也可组合（如 `1h30m`）；值必须恰好包含一个 `/`，
+  格式非法时回落到内置兜底值 `40/3h`
+- 把某个模型的值写成 `DISABLED` 即禁止使用该模型，请求返回 **403**（`model_disabled`），
+  与额度耗尽的 **429**（`model_cap_exceeded`）区分开
+- `research` / `agent` 由请求体的 `system_hints` 触发，`auto` 对应模型选择器的「Auto」档，
+  它们都是普通模型键：删掉并不会「不受限制」，而是回落到 `DEFAULT`
+- 禁止词：新建 `data/auditlimit/keywords.txt` 并每行写一个词，命中后返回 400
+- 内容审核（可选）：只有在取消注释并填入 `OAIKEY` 后才会调用审核接口；调用失败时按
+  「通过」放行，不会连带影响主业务
+
+不需要限流的话，删除 `chatgpt-share-server` 的 `AUDIT_LIMIT_URL` 环境变量即可。
 
 对外提供访问时，参考主项目安装文档配置反向代理。
 

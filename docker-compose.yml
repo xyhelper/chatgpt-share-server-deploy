@@ -99,14 +99,59 @@ services:
       CLEAN_PROPORTION: 0.5 # 存储使用率超过该比例时触发清理,须为小于 1 的小数
     labels:
       - "com.centurylinklabs.watchtower.scope=xyhelper-chatgpt-share-server"
+  # 内容审核与频率限制服务
+  #   按「用户 token + 模型」两个维度分别限流,可选叠加内容审核,
+  #   由 chatgpt-share-server 通过 AUDIT_LIMIT_URL 调用,接口为 POST /audit_limit。
+  #   说明见 https://github.com/xyhelper/auditlimit
+  #   限流值格式为 "次数/时间",如 "60/3h" 表示每 3 小时最多 60 次;
+  #   把某个模型的值写成 DISABLED 即禁止用户使用该模型(返回 403)。
+  #   模型名转配置键的规则:转为大写,并把 "." 换成 "_"
+  #   (如 gpt-5.6-sol-wm → GPT-5_6-SOL-WM),下面每一项都是一个模型。
+  #   未在下方单独配置的模型一律落到 DEFAULT。
   auditlimit:
     image: xyhelper/auditlimit
     restart: always
-    # ports:
-    #   - 9611:8080
+    # 只由 chatgpt-share-server 在容器网络内调用,默认不对外暴露。
+    # 需要本机调试时可打开(容器内固定监听 8080,不要设置 PORT):
+    #   - 127.0.0.1:9611:8080
+    volumes:
+      # 挂载后可用 data/auditlimit/keywords.txt 逐行配置禁止词,文件为空则该功能不启用
+      - ./data/auditlimit/:/app/data/
     environment:
-      LIMIT: 40  # 限制每个userToken允许的次数
-      PER: "3h" # 限制周期 1s, 1m, 1h, 1d, 1w, 1y
+      TZ: Asia/Shanghai # 指定时区
+      # 内容审核所用的 OpenAI key,留空则只做限流、不做审核
+      # OAIKEY: "sk-xxxxxx"
+      # 兜底值:未单独配置的模型都用这一项
+      DEFAULT: "20/3h"
+      # Auto 档(模型选择器中的「Auto」,请求带 model=auto)
+      AUTO: "200/3h"
+      # 研究 / 代理模式(由请求体的 system_hints 触发)
+      RESEARCH: "2/24h"
+      AGENT: "2/24h"
+      # Pro
+      GPT-5-5-PRO: "7/24h"
+      GPT-5-6-PRO: "7/24h"
+      GPT-6-PRO: "7/24h"
+      # Thinking
+      GPT-5-5-THINKING: "20/3h"
+      GPT-5-6-THINKING: "20/3h"
+      GPT-5-6-T-MINI: "20/3h"
+      # 标准
+      GPT-5-6: "60/3h"
+      GPT-5-5-INSTANT: "60/3h"
+      GPT-5-6-INSTANT: "60/3h"
+      # 工作模式 / Codex,模型名中的 "." 在配置键里写作 "_"
+      GPT-5_5-WM: "60/3h"
+      GPT-5_6-SOL-WM: "60/3h"
+      GPT-5_6-TERRA-WM: "60/3h"
+      GPT-5_6-LUNA-WM: "60/3h"
+      GPT-6-ASTRA-WM: "60/3h"
+      # Codex 内部别名
+      GPT-5_5: "60/3h"
+      GPT-5_6-SOL: "60/3h"
+      GPT-5_6-TERRA: "60/3h"
+      GPT-5_6-LUNA: "60/3h"
+      GPT-6-ASTRA: "60/3h"
     labels:
       - "com.centurylinklabs.watchtower.scope=xyhelper-chatgpt-share-server"
   watchtower:
