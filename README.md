@@ -45,6 +45,29 @@ docker compose up -d chatgpt-web-ui
 
 密钥变更后已登录用户的 cookie 会失效，需要重新登录，属正常现象。
 
+### ⚠️ 部署后建议修改的其他配置
+
+`config.yaml` 里还有几处默认值不适合直接对外服务。`./deploy.sh` 每次执行都会把这几项
+的检查结果打印出来（只提示，不会改写你的文件）：
+
+| 配置项 | 默认值 | 不改的后果 |
+| --- | --- | --- |
+| `modules.base.jwt.secret` | `chatgpt-share-server` | 该值属于 cool-admin 内置的弱密钥名单，启动时会被替换成**每次启动都不同**的随机值，容器每重启一次（watchtower 自动更新镜像同样会触发）后台登录态就全部失效 |
+| `cool.file.domain` | `http://127.0.0.1:8300` | 后台「上传管理 / 用户头像」返回的文件地址指向访客自己的电脑，图片无法显示 |
+| `database.default.pass` | `123456` | MySQL 不映射宿主机端口，只在容器网络内可达，风险有限；若要修改，请与 `docker-compose.yml` 的 `MYSQL_ROOT_PASSWORD` 同时改 |
+
+修改示例：
+
+```bash
+cd chatgpt-share
+SECRET=$(openssl rand -hex 32)
+sed -i "s/secret: \"chatgpt-share-server\"/secret: \"$SECRET\"/" config.yaml
+sed -i 's|domain: "http://127.0.0.1:8300"|domain: "https://admin.yourdomain.com"|' config.yaml
+docker compose up -d --force-recreate chatgpt-share-server
+```
+
+`cool.file.domain` 要填实际对外可访问的地址，通常是反向代理到 `8300` 的那个域名。
+
 ### 服务与端口
 
 | 服务 | 宿主机端口 | 作用 |
@@ -99,7 +122,51 @@ GPT-5-6: "60/3h"
 
 不需要限流的话，删除 `chatgpt-share-server` 的 `AUDIT_LIMIT_URL` 环境变量即可。
 
-对外提供访问时，参考主项目安装文档配置反向代理。
+### 对外暴露面
+
+管理后台（`8300/xyhelper`）与库文件清理管理页（`9900/gpt.html`）都**没有额外的身份
+校验**，且默认口令是 `admin` / `123456`。建议：
+
+- 登录后台后立即修改管理员密码
+- `8300`、`9900` 不要直接对公网开放，用反向代理 + HTTPS，并按需加 IP 白名单或基本认证
+- 只对外暴露用户入口 `8400`（或经反向代理后的 `80` / `443`），并用防火墙限制其余端口
+
+防火墙示例：
+
+```bash
+ufw allow 22/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw enable
+```
+
+反向代理的完整配置（Caddy / Nginx 示例）见主项目安装文档。
+
+### 数据与备份
+
+所有持久化数据都在本目录的 `data/` 下：`data/mysql`（业务库）、`data/redis`、
+`data/chatgpt-share-server`（日志等）、`data/auditlimit`（禁止词表）。备份或迁移只需打包
+`data/` 与 `config.yaml`、`docker-compose.yml`。
+
+> MySQL 升级大版本时会就地升级 `data/mysql` 中的数据文件，且不可回退，升级前请先备份。
+
+### 升级
+
+镜像更新由 `watchtower` 自动完成，日常无需手动操作。但 `./deploy.sh` **只拉取镜像，
+不会覆盖 `docker-compose.yml` / `config.yaml`** —— 你可能已经按自己的需求改过这两个
+文件，自动拉取会覆盖掉你的改动。因此当部署包新增了服务或新的默认配置时，需要手动
+拉取并合并：
+
+```bash
+cd chatgpt-share
+git stash
+git pull --ff-only
+git stash pop    # 如有冲突，按提示手工合并 docker-compose.yml / config.yaml
+./deploy.sh
+```
+
+不想保留本地改动时，也可以先 `git checkout -- docker-compose.yml`（会丢弃改动）再
+`git pull`。
 
 ## 文档
 

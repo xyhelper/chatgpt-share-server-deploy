@@ -1,8 +1,22 @@
+# ======================================================================
+# ChatGPT-Share-Server 运行配置
+# ----------------------------------------------------------------------
+# 本文件会被挂载为容器内的 /app/config.yaml。
+# 注意:此处的值优先于 docker-compose.yml 中的同名环境变量,例如下面故意没有写
+#       AUDIT_LIMIT_URL / LIBCLEANUPSERVER,就是为了让 compose 里的环境变量生效;
+#       若在这里补上这两个键,compose 中的设置会被静默覆盖。
+# 下面标了 ⚠️ 的项建议在正式对外服务前修改,改完需重启容器:
+#   docker compose up -d --force-recreate chatgpt-share-server
+# 更多安全建议见仓库 README。
+# ======================================================================
 database:
   default: # 数据源名称,当不指定数据源时 default 为默认数据源
     type: "mysql" # 数据库类型
-    host: "mysql" # 数据库地址
+    host: "mysql" # 数据库地址(容器网络内的服务名)
     port: "3306" # 数据库端口
+    # 需与 docker-compose.yml 的 MYSQL_ROOT_PASSWORD 保持一致。
+    # MySQL 不映射宿主机端口,只在容器网络内可达,因此沿用该口令;
+    # 若要修改,请两处同时改。
     user: "root" # 数据库用户名
     pass: "123456" # 数据库密码
     name: "cool" # 数据库名称
@@ -14,21 +28,34 @@ database:
 
 redis:
   cool:
-    address: "redis:6379"
+    address: "redis:6379" # 容器网络内的 Redis 服务名
+    # 若给 docker-compose.yml 里的 redis 配上 --requirepass,请在此补充密码,
+    # 否则 chatgpt-share-server 与 chatgpt-file-deletion 都会连不上:
+    # pass: "<密码>"
     db: 0
 
 
 cool:
+  # 启动时按登记的表结构补齐缺失的列。全新安装依赖它把初始 SQL 补到最新,请勿关闭。
   autoMigrate: true
   eps: true
   file:
     mode: "local"
+    # ⚠️ 后台「上传管理 / 用户头像」等返回的文件地址以此域名拼接。
+    #    保持 127.0.0.1 时,访客拿到的地址指向他自己的电脑,图片无法显示。
+    #    请改成对外可访问的地址,通常是反向代理到 8300 的域名,例如:
+    #    domain: "https://admin.yourdomain.com"
+    #    另外这里写死了 8300,若该域名只反代了 8400,也要一并调整。
     domain: "http://127.0.0.1:8300"
 
 modules:
   base:
     jwt:
       sso: false
+      # ⚠️ 该默认值属于框架内置的弱密钥名单,启动时会被替换成「每次启动都不同」
+      #    的随机值,导致容器每重启一次(watchtower 自动更新镜像也会触发)
+      #    后台登录态就全部失效。请改成固定的强随机串:
+      #    openssl rand -hex 32
       secret: "chatgpt-share-server"
       token:
         expire: 7200 # 2*3600
