@@ -23,6 +23,14 @@ https://github.com/cockroachai/cockroachai
 curl -sSfL https://raw.githubusercontent.com/xyhelper/chatgpt-share-server-deploy/deploy/quick-install.sh | bash
 ```
 
+手动部署：
+
+```bash
+git clone -b deploy --depth=1 https://github.com/xyhelper/chatgpt-share-server-deploy.git chatgpt-share
+cd chatgpt-share
+./deploy.sh
+```
+
 部署完成后：
 
 | 入口 | 地址 | 说明 |
@@ -128,7 +136,7 @@ GPT-5-6: "60/3h"
 校验**，且默认口令是 `admin` / `123456`。建议：
 
 - 登录后台后立即修改管理员密码
-- `8300`、`9900` 不要直接对公网开放，用反向代理 + HTTPS，并按需加 IP 白名单或基本认证
+- `8300`、`9900` 不要直接对公网开放，用反向代理 + HTTPS（配置见 [安装指南 → 反代配置](./docs/install/README.md#反代配置)），并按需加 IP 白名单或基本认证
 - 只对外暴露用户入口 `8400`（或经反向代理后的 `80` / `443`），并用防火墙限制其余端口
 
 防火墙示例：
@@ -140,15 +148,7 @@ ufw allow 443/tcp
 ufw enable
 ```
 
-反向代理的完整配置（Caddy / Nginx 示例）见主项目安装文档。
-
-### 数据与备份
-
-所有持久化数据都在本目录的 `data/` 下：`data/mysql`（业务库）、`data/redis`、
-`data/chatgpt-share-server`（日志等）、`data/auditlimit`（禁止词表）。备份或迁移只需打包
-`data/` 与 `config.yaml`、`docker-compose.yml`。
-
-> MySQL 升级大版本时会就地升级 `data/mysql` 中的数据文件，且不可回退，升级前请先备份。
+更多内容（系统优化参数、反向代理完整示例、数据备份与管理命令）见[安装指南](./docs/install/README.md)。
 
 ### 升级
 
@@ -170,8 +170,13 @@ git stash pop    # 如有冲突，按提示手工合并 docker-compose.yml / con
 
 ## 文档
 
-[https://chatgpt-share-server.xyhelper.cn](https://chatgpt-share-server.xyhelper.cn)
+完整的部署与配置手册在 [`docs/`](./docs/README.md)：
 
+- [安装指南](./docs/install/README.md) —— 前置条件、系统优化、部署、反向代理、管理后台、常用管理命令与升级
+- [配置指南](./docs/config/README.md) —— 常用环境变量一览，以及限流、备份、多端登录、语音、OAuth 等专题
+- [界面预览](./docs/preview/README.md)
+
+`docker-compose.yml` 与 `config.yaml` 里也有对应的行内注释。
 
 ## 交流群
 
