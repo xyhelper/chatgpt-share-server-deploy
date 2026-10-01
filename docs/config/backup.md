@@ -41,10 +41,10 @@ share 使用`docker-compose.yml`文件进行项目配置，以下命令将备份
 
 ```bash
 DATE=$(date +%Y%m%d-%H%M%S)
-docker-compose down
+docker compose down
 tar -zcvf share-$DATE.tar.gz .
 mv share-$DATE.tar.gz /path/to/backup
-docker-compose up -d
+docker compose up -d
 ```
 
 ## 在新环境恢复项目
@@ -57,5 +57,5 @@ mv share-日期.tar.gz chatgpt-share
 cd chatgpt-share
 tar -zxvf share-日期.tar.gz
 rm share-日期.tar.gz
-docker-compose up -d
+docker compose up -d
 ```

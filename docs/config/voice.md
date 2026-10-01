@@ -2,7 +2,7 @@
 
 ## 端点配置
 
-系统默认提供了两个语音服务端点,分别是 `https://voice.xyhelper.cn` 和 `https://voice.closeai.biz` , 你可以在 `docker-compose.yml` 配置文件中进行切换。
+语音对话基于 LiveKit 实现,服务端通过配置项 `VOICESERVER` 把语音服务地址下发给前端,默认值为 `wss://webrtc.xyhelper.cn`,可以在 `docker-compose.yml` 或 `config.yaml` 中修改。
 
 ```yaml
 # docker-compose.yml
@@ -21,7 +21,7 @@
       # 内容审核及速率限制
       AUDIT_LIMIT_URL: "http://auditlimit:8080/audit_limit"
       # 语音服务地址
-      VOICESERVER: "https://voice.closeai.biz"
+      VOICESERVER: "wss://webrtc.xyhelper.cn"
     volumes:
       - ./config.yaml:/app/config.yaml
       - ./data/chatgpt-share-server/:/app/data/
@@ -30,6 +30,10 @@
 # 其他配置省略
 
 ```
+
+> **提示**
+> `VOICESERVER` 填的是前端直连的 WebSocket 地址,须以 `wss://`(本地调试时可为 `ws://`)开头,
+> 不要填普通的 `https://` 地址。
 
 ## 自建语音服务
 
@@ -44,3 +48,6 @@ services:
     ports:
       - 3005:3005
 ```
+
+自建完成后,把 `chatgpt-share-server` 的 `VOICESERVER` 指向该服务的对外 WebSocket 地址
+(例如经反向代理后的 `wss://voice.yourdomain.com`),并确认该地址能从浏览器直接访问。

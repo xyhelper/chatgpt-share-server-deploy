@@ -106,18 +106,24 @@ ANALYZE TABLE chatgpt_conversations;
 
 ## 手工检查与执行
 
-镜像内的 `WORKDIR` 就是 `/app`，可以直接在容器里执行维护命令：
+镜像内的 `WORKDIR` 就是 `/app`，可以直接进容器执行维护命令。下面的命令需要在
+`docker-compose.yml` 所在目录执行（容器名由 compose 自动生成，所以用 `docker compose exec`
+按服务名进入，不要直接 `docker exec chatgpt-share-server`）：
 
 ```bash
 # 只检查，列出待处理项（默认行为，不执行任何 DDL）
-docker exec -it chatgpt-share-server /app/main migrate
+docker compose exec chatgpt-share-server /app/main migrate
 
 # 立即执行建表与补列（正常启动时也会自动做）
-docker exec -it chatgpt-share-server /app/main migrate --apply
+docker compose exec chatgpt-share-server /app/main migrate --apply
 
 # 同时同步创建缺失索引（大表慎用，正常启动时是后台自动做）
-docker exec -it chatgpt-share-server /app/main migrate --apply --indexes
+docker compose exec chatgpt-share-server /app/main migrate --apply --indexes
 ```
+
+> **提示**
+> 在脚本或 CI 等没有 TTY 的环境里执行时，加上 `-T`：
+> `docker compose exec -T chatgpt-share-server /app/main migrate`。
 
 输出示例：
 
@@ -162,7 +168,7 @@ cool:
 **Q：接口报 `1054 Unknown column 'xxx' in 'field list'`？**
 
 正常情况下不会出现 —— 补列失败时进程会直接退出而不是带缺列服务。
-如果确实出现，请先执行 `docker exec -it chatgpt-share-server /app/main migrate` 查看待处理项。
+如果确实出现，请先执行 `docker compose exec chatgpt-share-server /app/main migrate` 查看待处理项。
 
 **Q：为什么索引建了很久都没建上？**
 

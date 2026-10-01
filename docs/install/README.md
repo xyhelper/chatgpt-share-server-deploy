@@ -95,6 +95,8 @@ cd chatgpt-share
 
 `chatgpt-web-ui` 的 `/backend-api`、`/public-api`、`/realtime`、`/carpage` 等请求都在容器内反代到 `chatgpt-share-server`,两者需一起运行,共用同一套车队/账号数据。
 
+还有一个不对外暴露的 `watchtower`,负责把上面这些服务的镜像自动升级到 `latest`(只作用于带 `watchtower.scope` 标签的服务)。各服务可配置的环境变量见[附带服务配置](../config/services.md)。
+
 ### 库文件清理
 
 `chatgpt-share-server` 通过环境变量 `LIBCLEANUPSERVER` 指向 `chatgpt-file-deletion`,每次账号登录态刷新时自动把该账号加入清理队列,清理其在 ChatGPT 侧上传的库文件(附件/图片等),避免账号存储越用越满,无需额外配置。
@@ -183,8 +185,8 @@ Caddy 会自动处理 WebSocket 升级,无需额外配置(聊天实时流走 `/r
 仍想继续使用旧版页面的话,把上面的 `127.0.0.1:8400` 换成 `127.0.0.1:8300` 即可,新旧两个页面共用同一套数据,可随时切换。
 
 > **注意：使用 nginx 时注意两点**
-> 1. 文件上传会经本服务的 `/files?upload_url=` 反代,需放宽请求体大小,例如 `client_max_body_size 512m;`
-> 2. 实时流使用 WebSocket,`location` 中需带上 `proxy_http_version 1.1;` 与 `proxy_set_header Upgrade $http_upgrade;`、`proxy_set_header Connection "upgrade";`
+> 1. 上传文件走 `/backend-api/files`（multipart 上传，还有 `/backend-api/files/process_upload_stream` 的分片上传），需放宽请求体大小，例如 `client_max_body_size 512m;`（服务端自身的上限是 200MB，nginx 的限制不要小于这个值）
+> 2. 实时流使用 WebSocket，`location` 中需带上 `proxy_http_version 1.1;` 与 `proxy_set_header Upgrade $http_upgrade;`、`proxy_set_header Connection "upgrade";`
 
 ## 管理
 
