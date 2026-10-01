@@ -250,21 +250,47 @@ cd chatgpt-share
 
 ### 升级
 
-镜像更新由 `watchtower` 自动完成,日常无需手动操作。
+镜像更新由 `watchtower` 自动完成,日常无需手动操作。**只更新镜像不需要动仓库文件。**
 
-`./deploy.sh` 只拉取镜像,**不会覆盖 `docker-compose.yml` / `config.yaml`**:这两个文件
-你可能已经按自己的需要改过,自动拉取会覆盖掉你的改动。因此当部署包新增了服务或新的
-默认配置时,需要手动拉取并合并:
+#### ⚠️ 手动拉取更新前,务必先备份 `docker-compose.yml` 与 `config.yaml`
+
+`./deploy.sh` 只拉取镜像,**不会覆盖 `docker-compose.yml` / `config.yaml`**:这两个
+文件你可能已经按自己的需要改过(`FAKE_TOKEN_SECRET`、上传域名、数据库口令等),
+所以脚本不会替你动它们。
+
+但**用 `git` 命令拉取仓库更新时,会碰到这两个文件**:
+
+| 命令 | 后果 |
+| --- | --- |
+| `git pull` | 本地改过的文件与远程冲突,拉取直接中断 |
+| `git checkout .` | **丢弃 `docker-compose.yml` / `config.yaml` 的全部改动** |
+| `git reset --hard` | **同上,且不可恢复** |
+
+也就是说,为了「把更新拉下来」而执行了后两条,你改过的 `FAKE_TOKEN_SECRET`、上传
+域名、数据库口令等配置会被**永久删除**,除了你自己的备份之外**无法找回**。
+
+正确的升级步骤(先备份,再拉取,最后手工合并):
 
 ```bash
 cd chatgpt-share
-git stash
-git pull --ff-only
-git stash pop    # 如有冲突,按提示手工合并 docker-compose.yml / config.yaml
-./deploy.sh
+cp docker-compose.yml docker-compose.yml.bak   # 1. 先备份
+cp config.yaml        config.yaml.bak
+git stash                                      # 2. 暂存你的改动
+git pull --ff-only                             # 3. 拉取更新
+git stash pop                                  # 4. 恢复并手工合并
+# 报冲突就编辑 docker-compose.yml / config.yaml 逐个确认
+./deploy.sh                                    # 5. 重启生效
 ```
 
-不想保留本地改动时,也可以先 `git checkout -- docker-compose.yml` 丢弃改动,再 `git pull`。
+合并完成后,对照 `.bak` 确认三处关键配置还在,没问题再删备份:
+
+- `docker-compose.yml` 的 `FAKE_TOKEN_SECRET`
+- `config.yaml` 的 `modules.base.jwt.secret`
+- `config.yaml` 的 `cool.file.domain`
+
+```bash
+rm docker-compose.yml.bak config.yaml.bak
+```
 
 ### 查看日志
 

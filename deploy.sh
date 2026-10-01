@@ -76,11 +76,46 @@ warn <<'EOF'
      对外只需要暴露用户入口 8400(或经反向代理后的 80/443)。
 EOF
 
-## 5) 升级说明:本脚本只更新镜像,不会覆盖用户改过的 compose / config。
-warn <<'EOF'
-  📌 升级说明:本脚本只拉取新镜像,不会覆盖 docker-compose.yml / config.yaml
-     (你可能已经改过它们,自动拉取会冲突)。要拿到新增服务或新的默认配置,请手动执行:
-       git stash && git pull --ff-only && git stash pop
-     然后重新运行 ./deploy.sh。
+## 5) 升级说明。这一段单独用更重的边框:git 相关命令用错会永久删掉你改过的
+##    compose / config,是整个升级流程里最容易出事的一步,值得喊得响一点。
+danger() {
+  echo "  ######################################################################"
+  echo "  ###  $1"
+  echo "  ######################################################################"
+  cat
+  echo "  ######################################################################"
+}
+
+danger "升级前必读:用错命令会永久删掉你改过的配置" <<'EOF'
+
+    本脚本只拉取新镜像,不会覆盖 docker-compose.yml / config.yaml
+    —— 你很可能已经改过它们(FAKE_TOKEN_SECRET、上传域名、数据库口令等),
+       所以脚本不会替你动这两个文件。
+
+    !! 但下面这些 git 命令会覆盖它们,执行前必须先备份:
+
+       git pull             本地改过的文件与远程冲突,拉取会直接中断
+       git checkout .       直接丢弃 docker-compose.yml / config.yaml 的全部改动
+       git reset --hard     同上,且不可恢复
+
+    !! 一旦为了「把更新拉下来」而执行了后两条,你改过的 FAKE_TOKEN_SECRET、
+       上传域名、数据库口令等配置会被永久删除,无法找回(除了你自己的备份)。
+
+    安全步骤:先备份,再拉取,最后手工合并。
+
+       cd 部署目录
+       cp docker-compose.yml docker-compose.yml.bak   # 1. 先备份
+       cp config.yaml        config.yaml.bak
+       git stash                                      # 2. 暂存你的改动
+       git pull --ff-only                             # 3. 拉取更新
+       git stash pop                                  # 4. 恢复并手工合并
+       #  报冲突就编辑 docker-compose.yml / config.yaml 逐个确认
+       #  合并完对照 .bak 检查三处关键配置是否还在:
+       #    docker-compose.yml 的 FAKE_TOKEN_SECRET
+       #    config.yaml 的 modules.base.jwt.secret
+       #    config.yaml 的 cool.file.domain
+       ./deploy.sh                                    # 5. 重启生效
+
+    只更新镜像、不动仓库文件的话,什么都不用做 —— watchtower 会自动完成。
 EOF
 echo
