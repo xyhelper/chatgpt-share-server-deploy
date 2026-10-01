@@ -27,6 +27,7 @@ fi
 
 ## 提示信息
 echo "服务启动成功，请访问 http://localhost:8400"
+echo "库文件清理管理页 http://localhost:9900/gpt.html"
 echo "管理员后台地址 http://localhost:8300/xyhelper"
 echo "管理员账号: admin"
 echo "管理员密码: 123456"

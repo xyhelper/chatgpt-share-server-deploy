@@ -34,6 +34,9 @@ services:
       AUTHKEY: "xyhelper"
       # 内容审核及速率限制
       AUDIT_LIMIT_URL: "http://auditlimit:8080/audit_limit"
+      # 库文件清理服务地址(对应下方 chatgpt-file-deletion 服务)
+      # 配置后可在后台使用「清理库文件」功能,留空则不启用
+      LIBCLEANUPSERVER: "http://chatgpt-file-deletion:8001/gpt/library/clean/file"
     volumes:
       - ./config.yaml:/app/config.yaml
       - ./data/chatgpt-share-server/:/app/data/
@@ -69,6 +72,31 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    labels:
+      - "com.centurylinklabs.watchtower.scope=xyhelper-chatgpt-share-server"
+  # 库文件清理服务
+  #   按 accessToken 清理该账号在 ChatGPT 侧上传的库文件(附件/图片等),
+  #   避免存储越用越满。由 chatgpt-share-server 通过 LIBCLEANUPSERVER 调用,
+  #   POST /gpt/library/clean/file,body 为 {"accessToken":"..."}。
+  #   管理页面:http://服务器IP:9900/gpt.html
+  #   说明见 https://github.com/xyhelper/chatgpt-file-deletion-deploy
+  #   复用上面的 redis 服务:镜像内置 config.yaml 中 redis.cool.address 即为 redis:6379
+  chatgpt-file-deletion:
+    image: ghcr.io/xyhelper/chatgpt-file-deletion:latest
+    restart: always
+    depends_on:
+      - redis
+    ports:
+      - 9900:8001
+    environment:
+      TZ: Asia/Shanghai # 指定时区
+      # ChatGPT 接入点地址,需与上方 chatgpt-share-server 的 CHATPROXY 保持一致
+      GPTPROXY: "https://demo.xyhelper.cn"
+      # 企业微信机器人 webhook 地址,留空则不发送通知
+      # WEBHOOKURL: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"
+      CONCURRENCY: 1 # 账号并发数
+      CLEAN_MINTUNES: 1440 # 清理该时长(分钟)之前上传的文件,必须是整数,默认 1440(24 小时)
+      CLEAN_PROPORTION: 0.5 # 存储使用率超过该比例时触发清理,须为小于 1 的小数
     labels:
       - "com.centurylinklabs.watchtower.scope=xyhelper-chatgpt-share-server"
   auditlimit:
