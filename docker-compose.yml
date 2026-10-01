@@ -39,6 +39,38 @@ services:
       - ./data/chatgpt-share-server/:/app/data/
     labels:
       - "com.centurylinklabs.watchtower.scope=xyhelper-chatgpt-share-server"
+  # 新版 Web UI(用户访问入口)
+  #   基于真实 ChatGPT 页面模板渲染,自带车队列表页,无状态(登录态存浏览器 cookie)。
+  #   上游直接指向本项目的 chatgpt-share-server,两边共用同一套车队/账号数据。
+  #   管理后台仍在 chatgpt-share-server(8300/xyhelper),本服务只负责页面渲染与反代。
+  #   完整配置项说明见 https://github.com/xyhelper/chatgpt-web-ui-deploy
+  chatgpt-web-ui:
+    image: ghcr.io/xyhelper/chatgpt-web-ui:latest
+    restart: always
+    depends_on:
+      - chatgpt-share-server
+    ports:
+      - 8400:80
+    environment:
+      TZ: Asia/Shanghai # 指定时区
+      PORT: "80" # web 服务监听端口,需与上面的端口映射保持一致
+      # 上游 API 地址:容器内直接访问 chatgpt-share-server,不经过宿主机端口
+      UPSTREAM_URL: "http://chatgpt-share-server:8001"
+      RUN_MODE: "share" # 分享模式,与 chatgpt-share-server 的车队模式配套
+      LOGIN_URL: "/list" # 未登录时先展示车队列表页,点击车队再进入登录
+      # 自签 access token 的签名密钥,share 模式必填
+      # ⚠️ 必须改成随机值。默认值等同于把密钥公开,任何人都能伪造任意账号的登录态
+      #    生成方式:openssl rand -hex 32
+      FAKE_TOKEN_SECRET: "change-me-to-a-random-secret"
+    healthcheck:
+      # /healthz 是独立探活端点,不渲染页面、不请求上游、不依赖登录态
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:80/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "com.centurylinklabs.watchtower.scope=xyhelper-chatgpt-share-server"
   auditlimit:
     image: xyhelper/auditlimit
     restart: always
