@@ -65,6 +65,9 @@ services:
       # 库文件清理服务地址(对应下方 chatgpt-file-deletion 服务)
       # 配置后可在后台使用「清理库文件」功能,留空则不启用
       LIBCLEANUPSERVER: "http://chatgpt-file-deletion:8001/gpt/library/clean/file"
+      # 会话内容兜底刷新频率(默认每小时)。上游会话列表接口有限流,
+      # 账号/会话较多时建议调低频率,如 @every 4h、@every 6h。
+      CONVERSATION_REFRESH_CRON: "@every 4h"
     volumes:
       - ./config.yaml:/app/config.yaml
       - ./data/chatgpt-share-server/:/app/data/
