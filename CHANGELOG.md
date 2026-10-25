@@ -68,6 +68,9 @@
   `files/library/mounted/capabilities`。
 - **会话标题**：SSE `title_generation` 事件即时原子更新本地标题，避免被
   `New chat` 占位记录覆盖。
+- **会话导出**：web-ui 会话页增加“导出 MD / 导出 PDF”，与分享/更多同一行；
+  Markdown 保留深度思考摘要、PDF 嵌入图片附件，文件名包含完整 conversation ID；
+  “换号”按钮下移避免重叠。
 
 ## [2026-10-22]
 
