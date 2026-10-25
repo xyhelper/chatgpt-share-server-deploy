@@ -50,6 +50,10 @@
   `scribble-sheet.webp`、`wanderlust-postcard-sheet.webp` 已验证为有效 WebP。
 - **Web UI 工作标签默认隐藏**：compose 设置 `SHOW_WORKSPACE=false`，并兼容新版
   “聊天/工作”切换器；持久化的 work 模式会自动切回 chat。
+- **新版侧边栏开关**：新增 `SHOW_SITES_MENU`、`SHOW_EXPLORE_MENU`；同时修正
+  `SHOW_PLUGINS_MENU` 对新版 `enabled` 字段的适配。`SHOW_GPT_MENU` /
+  `SHOW_AGENTS_MENU` / `SHOW_DEEP_RESEARCH_MENU` 在新版 UI 已没有对应独立入口，
+  建议改用 `SHOW_EXPLORE_MENU` 或按旧模板保留。
 - **静态资源与缓存**：AVIF 静态资源加入白名单；Service Worker 缓存版本纳入关键
   资源哈希，模板更新后自动切换缓存桶。
 - **部署安全**：日志不再输出 accessToken/refreshToken/user token；升级后新日志不会
