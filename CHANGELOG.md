@@ -55,7 +55,8 @@
   详情、归档、恢复、mark_read、cancel、turns、stream 先校验归属并按登记车转发；
   旧任务仅在关联会话归属明确时认领，避免同一账号下的任务跨用户可见。
 - **Web UI 工作标签默认隐藏**：部署 compose 设置 `SHOW_WORKSPACE=false`，
-  并兼容新版“聊天/工作”切换器结构；需要显示时改为 `true`。
+  并兼容新版“聊天/工作”切换器结构；需要显示时改为 `true`。已处理上次持久化的
+  work 模式会自动切回 chat，避免隐藏切换器后无法切回。
 - **资料空间隔离**：新增 `chatgpt_library_objects`，space 为根，page/file/directory
   继承归属；spaces/pages/files 接口按 `usertoken` 过滤和校验，共享/协作入口关闭。
   历史无归属资料默认不展示。
