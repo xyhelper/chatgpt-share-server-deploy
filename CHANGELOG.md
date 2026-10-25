@@ -8,6 +8,32 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [2026-10-25]
+
+### 新增/变更
+
+- **Deep Research（深度研究）MCP sandbox 改走单域名 `sandbox.xyhelper.cn`**：
+  新版 ChatGPT 模板的 MCP app sandbox 会请求 `mcp-app-*.web-sandbox...` 地址；
+  没有泛解析时无法到达。部署时增加一条 `sandbox.xyhelper.cn` DNS（Cloudflare
+  可保持 CDN 开启），由 Caddy 以 HTTP:80 回源反代到
+  `https://web-sandbox.xyhelper.cn`，不需要 `*.web-sandbox.xyhelper.cn` 泛解析。
+  Caddy 配置见 `chatgpt-web-ui` 仓库的 `deploy/sandbox.xyhelper.cn.Caddyfile`。
+- **模板更新后需要重新执行 MCP sandbox 补丁**：
+  `chatgpt-web-ui/scripts/patch-mcp-sandbox.sh` 会把 sourceUrl 固定到
+  `https://sandbox.xyhelper.cn/`，并适配 sourceUrl 校验。模板版本更新后必须
+  重新执行一次；当前模板已执行。
+- 跨车会话的附件、图片、文件信息与会话详情统一按会话所属车路由；会话详情在
+  上游不可用时继续回退本地只读备份。升级后无需数据迁移。
+- `ProxyBackendWithCar` 响应新增 `X-Car-Id`，便于前端/排障确认实际会话车号。
+
+### 修复
+
+- **`POST /backend-api/files` 偶发 500**：`devicecheck` 缓存读取不再跟随客户端
+  请求取消，避免 Redis `context canceled` 被误报为 500。升级后无需操作。
+- **统一 `/backend-api/*` 会话选车兜底**：未知接口也会按 route/query/JSON body/
+  `xy-refer` 识别会话，避免逐个漏配路由；同时修复 body 重复发送导致的 502。
+  升级后无需操作。
+
 ## [2026-10-22]
 
 ### 变更
