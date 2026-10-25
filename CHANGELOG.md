@@ -51,6 +51,9 @@
   `pages/mentions/inbox`、`conversation/:id/url_safe`、`edge`、
   `conversation/implicit_message_feedback`、`aip/connectors/links/list_accessible`，
   不再经过 share/proxy 逐层透传。
+- **定时任务隔离**：新增 `chatgpt_tasks` 归属表，任务列表/搜索按用户过滤，
+  详情、归档、恢复、mark_read、cancel、turns、stream 先校验归属并按登记车转发；
+  旧任务仅在关联会话归属明确时认领，避免同一账号下的任务跨用户可见。
 
 ## [2026-10-22]
 
