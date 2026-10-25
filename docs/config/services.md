@@ -23,6 +23,7 @@
 | `UPSTREAM_URL` | `http://chatgpt-share-server:8001` | 上游 API 地址。容器之间用服务名互访，不要写宿主机端口 |
 | `RUN_MODE` | `share` | 运行模式，与 `chatgpt-share-server` 的车队模式配套 |
 | `LOGIN_URL` | `/list` | 未登录时跳转到的地址，默认先展示车队列表页 |
+| `SHOW_WORKSPACE` | `false` | 是否显示聊天/工作切换器；`false` 时强制隐藏，设为 `true` 恢复 |
 | `FAKE_TOKEN_SECRET` | `change-me-to-a-random-secret` | **必须修改**。share 模式下用它签发 access token，占位值等同于公开签名密钥 |
 
 该服务是无状态的，登录态保存在浏览器 cookie 中，不挂载数据卷；`/healthz` 是独立探活

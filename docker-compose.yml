@@ -92,6 +92,8 @@ services:
       UPSTREAM_URL: "http://chatgpt-share-server:8001"
       RUN_MODE: "share" # 分享模式,与 chatgpt-share-server 的车队模式配套
       LOGIN_URL: "/list" # 未登录时先展示车队列表页,点击车队再进入登录
+      # 是否显示聊天/工作切换器；false 时强制隐藏，设为 true 可恢复
+      SHOW_WORKSPACE: "false"
       # 自签 access token 的签名密钥,share 模式必填
       # ⚠️ 必须改成随机值。默认值等同于把密钥公开,任何人都能伪造任意账号的登录态
       #    生成方式:openssl rand -hex 32
