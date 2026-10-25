@@ -56,6 +56,10 @@
   旧任务仅在关联会话归属明确时认领，避免同一账号下的任务跨用户可见。
 - **Web UI 工作标签默认隐藏**：部署 compose 设置 `SHOW_WORKSPACE=false`，
   并兼容新版“聊天/工作”切换器结构；需要显示时改为 `true`。
+- **资料空间隔离**：新增 `chatgpt_library_objects`，space 为根，page/file/directory
+  继承归属；spaces/pages/files 接口按 `usertoken` 过滤和校验，共享/协作入口关闭。
+  历史无归属资料默认不展示。
+- **会话刷新 422 修复**：上游 `num_turns` 上限为 100，刷新任务改为 100，避免反复 422。
 
 ## [2026-10-22]
 
