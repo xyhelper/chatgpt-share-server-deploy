@@ -45,6 +45,9 @@
   `conversation/:id/url_safe`、`edge`、`conversation/implicit_message_feedback`、
   `aip/connectors/links/list_accessible` 由 web-ui 本地返回；`POST /v1/rgstr`
   也改为 web-ui 本地 `{"success":true}`，不再经过 share。
+- **Images 提示图缓存**：`/images-app/*` 改由 web-ui 从
+  `https://persistent.oaistatic.com` 拉取并落盘缓存，不再落到 iOS API 上游；
+  `scribble-sheet.webp`、`wanderlust-postcard-sheet.webp` 已验证为有效 WebP。
 - **Web UI 工作标签默认隐藏**：compose 设置 `SHOW_WORKSPACE=false`，并兼容新版
   “聊天/工作”切换器；持久化的 work 模式会自动切回 chat。
 - **静态资源与缓存**：AVIF 静态资源加入白名单；Service Worker 缓存版本纳入关键
