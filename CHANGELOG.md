@@ -61,6 +61,13 @@
   继承归属；spaces/pages/files 接口按 `usertoken` 过滤和校验，共享/协作入口关闭。
   历史无归属资料默认不展示。
 - **会话刷新 422 修复**：上游 `num_turns` 上限为 100，刷新任务改为 100，避免反复 422。
+- **站点功能**：website 纳入资料空间归属；站点创建/详情后自动 PATCH
+  `share_access=public`；web-ui 补齐 `/sites` 预览路由并清理 DIL runner 中
+  Cloudflare challenge 脚本。
+- **接口误拦修复**：放行 `accounts/{id}/users/owner_count` 与
+  `files/library/mounted/capabilities`。
+- **会话标题**：SSE `title_generation` 事件即时原子更新本地标题，避免被
+  `New chat` 占位记录覆盖。
 
 ## [2026-10-22]
 
