@@ -47,8 +47,10 @@
 - **账号误关修复**：请求级 401/402 先用 `/accounts/check/v4` 复核，确认凭据失效
   才关号；`Model not found`、workspace 权限不足等不再关闭账号。探针按 carid 缓存
   并合并并发，成功时同步 `plan_type` / `isPlus`。
-- **日志整理**：默认级别改为 `info`，逐请求路由日志收敛为单条 DEBUG，账号巡检
-  跳过已关闭账号；新增 `LOGGING.md` 说明排查入口和脱敏规则。
+- **固定值接口本地化**：web-ui 本地返回 `spaces/v2`、`pins/content`、
+  `pages/mentions/inbox`、`conversation/:id/url_safe`、`edge`、
+  `conversation/implicit_message_feedback`、`aip/connectors/links/list_accessible`，
+  不再经过 share/proxy 逐层透传。
 
 ## [2026-10-22]
 
