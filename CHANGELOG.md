@@ -8,6 +8,62 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [2026-10-26]
+
+本次为 10-25 之后的集中发布，包含账号隔离、资料空间、站点、会话导出与 Turnstile
+临时停用等变更。数据库表由服务启动时自动迁移，升级无需手工执行 SQL。
+
+### 新增/变更
+
+- **账号误关防护**：请求级 401/402 先调用 `/accounts/check/v4` 复核，确认凭据失效
+  才关闭账号；`Model not found`、workspace 权限不足、5xx/网络抖动不再直接关号。
+  探针按 carid 合并并发并缓存，成功时同步 `plan_type` / `isPlus`。
+- **只读会话与工作区**：工作区停用/移除后的会话返回本地缓存并标记
+  `is_read_only: true`，输入框稳定禁用；`workspace_policy` 等接口不再因会话车不可用
+  阻断，`SHOW_WORKSPACE=false` 时会强制回到聊天模式。
+- **定时任务隔离**：`chatgpt_tasks` 归属表；任务列表/搜索按用户过滤，详情、归档、
+  恢复、mark_read、cancel、turns、stream 先校验归属并按登记车转发；旧任务仅在
+  关联会话归属明确时认领。
+- **资料空间隔离**：`chatgpt_library_objects` 归属图；space 为根，page/file/directory
+  继承归属；`spaces`、`pages`、`files`、`library` 接口按 `usertoken` 过滤和校验，
+  共享/协作入口关闭。历史无归属资料默认不展示。
+- **站点隔离与公开**：website 纳入资料空间归属；`websites` / `hosting` 的列表、详情、
+  预览先校验归属；站点创建/详情后自动 PATCH `share_access=public`；旧站点可通过
+  所属会话的 project_id 认领并选用正确车。
+- **站点预览修复**：web-ui 补齐 `/sites`、`/sites/{projectId}`、`/sites/{projectId}/*`
+  SPA 路由，使用 `cindex` 模板渲染；清理本地 DIL runner 中 Cloudflare 注入的
+  challenge 脚本，避免跨域 `contentDocument` 异常。
+- **会话标题**：SSE `title_generation` 事件即时原子 upsert 本地标题，避免被
+  `New chat` 占位记录覆盖。
+- **会话导出**：会话页右上角与分享/更多同一行增加“导出 MD / 导出 PDF”；
+  Markdown 过滤内部 code/tool JSON、保留深度思考摘要；PDF 嵌入图片附件；
+  文件名包含完整 conversation ID；“换号”按钮下移避免重叠。
+- **Turnstile 临时停用**：`TurnstileEnabled()` 代码中固定返回 false，即使配置
+  `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` 也不注入前端 key、不要求 turnstile、
+  不调用 siteverify、不校验 token。不提供环境开关，后续修复后再恢复。
+- **固定值接口本地化**：`spaces/v2`、`pins/content`、`pages/mentions/inbox`、
+  `conversation/:id/url_safe`、`edge`、`conversation/implicit_message_feedback`、
+  `aip/connectors/links/list_accessible` 由 web-ui 本地返回。
+- **Web UI 工作标签默认隐藏**：compose 设置 `SHOW_WORKSPACE=false`，并兼容新版
+  “聊天/工作”切换器；持久化的 work 模式会自动切回 chat。
+- **静态资源与缓存**：AVIF 静态资源加入白名单；Service Worker 缓存版本纳入关键
+  资源哈希，模板更新后自动切换缓存桶。
+- **部署安全**：日志不再输出 accessToken/refreshToken/user token；升级后新日志不会
+  再包含凭据，建议轮换历史日志曾外发的 token。
+
+### 修复
+
+- **会话刷新 422**：上游 `num_turns` 上限为 100，备份刷新改用 100。
+- **`owner_count` 被 404 路由拦截**：放行
+  `/accounts/{account_id}/users/owner_count`，按会话 referer 选择会话车。
+- **mounted capabilities 被隔离误伤**：放行
+  `/files/library/mounted/capabilities`，避免 Google Drive/Dropbox/SharePoint
+  被误判为未连接；mounted 搜索/预览仍隔离。
+- **只读会话工作区设置阻断**：`workspace_policy` 在会话车不可用时回退当前 Session
+  车，工作区停用返回空策略，前端稳定显示只读提示。
+- **文件/附件跨车路由**：附件、图片、文件信息与会话详情统一按会话所属车路由；
+  上游详情不可用时回退本地只读备份。
+
 ## [2026-10-25]
 
 ### 新增/变更
