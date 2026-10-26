@@ -55,6 +55,9 @@
   `SHOW_AGENTS_MENU` / `SHOW_DEEP_RESEARCH_MENU` 在新版 UI 已没有对应独立入口，
   建议改用 `SHOW_EXPLORE_MENU` 或按旧模板保留。
 - **只读提示定位**：会话不可用时提示不再因 composer 尚未挂载/零尺寸而跑到左上角。
+- **429 限流兜底**：会话详情 429 仍展示本地历史，但用 `is_rate_limited=true` 区分，
+  不锁输入框，允许继续提问；Codex 用量刷新从 5 分钟降到 30 分钟，会话备份默认
+  改为 4 小时，降低后台请求触发 429 的概率。
 - **静态资源与缓存**：AVIF 静态资源加入白名单；Service Worker 缓存版本纳入关键
   资源哈希，模板更新后自动切换缓存桶。
 - **部署安全**：日志不再输出 accessToken/refreshToken/user token；升级后新日志不会
