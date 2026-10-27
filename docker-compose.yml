@@ -68,6 +68,10 @@ services:
       # 会话内容兜底刷新频率(默认每小时)。上游会话列表接口有限流,
       # 账号/会话较多时建议调低频率,如 @every 4h、@every 6h。
       CONVERSATION_REFRESH_CRON: "@every 4h"
+      # 是否强制校验会话归属,默认 false。
+      # 关闭时列表仍按 usertoken 过滤,但知道 convid 可打开/操作其他用户的会话;
+      # 设为 true 恢复详情、发送、重命名、归档、删除的归属校验。
+      ENFORCE_CONVERSATION_OWNERSHIP: "false"
     volumes:
       - ./config.yaml:/app/config.yaml
       - ./data/chatgpt-share-server/:/app/data/

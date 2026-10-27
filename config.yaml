@@ -9,6 +9,10 @@
 #   docker compose up -d --force-recreate chatgpt-share-server
 # 更多安全提示见仓库 README 的「对外暴露面」章节。
 # ======================================================================
+# 是否强制校验会话归属（默认 false；建议通过 docker-compose.yml 的同名环境变量设置）。
+# 关闭时列表仍按 usertoken 过滤，但知道 convid 可打开/操作其他用户的会话。
+# ENFORCE_CONVERSATION_OWNERSHIP: true
+
 database:
   default: # 数据源名称,当不指定数据源时 default 为默认数据源
     type: "mysql" # 数据库类型

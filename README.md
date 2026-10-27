@@ -124,6 +124,35 @@ GPT-5-6: "60/3h"
 
 不需要限流的话，删除 `chatgpt-share-server` 的 `AUDIT_LIMIT_URL` 环境变量即可。
 
+### 会话归属校验（可选）
+
+从当前版本开始，会话归属校验默认关闭：
+
+```yaml
+# docker-compose.yml → chatgpt-share-server → environment
+ENFORCE_CONVERSATION_OWNERSHIP: "false"
+```
+
+关闭时的边界：
+
+- 选车页/会话列表仍按当前用户 `usertoken` 过滤，不会在列表中看到其他用户的会话
+- 已知会话 ID 时，可以打开、发送、重命名、归档或删除该会话
+- 打开其他用户的会话时，会按该会话实际归属的账号/车路由
+
+需要恢复严格隔离时改为：
+
+```yaml
+ENFORCE_CONVERSATION_OWNERSHIP: "true"
+```
+
+开启后，非会话所属用户访问会返回 404。修改后执行：
+
+```bash
+docker compose up -d --force-recreate chatgpt-share-server
+```
+
+> 该开关只影响会话访问校验；定时任务仍有独立的归属校验。`
+
 ### 对外暴露面
 
 管理后台（`8300/xyhelper`）与库文件清理管理页（`9900/gpt.html`）都**没有额外的身份
