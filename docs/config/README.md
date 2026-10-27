@@ -61,6 +61,9 @@ Chatgpt-Share-Server 提供了丰富的配置选项，可以通过环境变量�
 | - | - | - |
 | `AUDIT_LIMIT_URL` | 空 | 内容审核 / 频率限制服务地址。部署包在 `docker-compose.yml` 中指向内置的 `auditlimit`，详见[审计限流](./auditlimit.md) |
 | `PROHIBIT_CONCURRENT_REQUEST` | `false` | 禁止同一 userToken 并发提问：为 `true` 时同一用户的第二个并发请求直接返回 429 |
+| `DEFAULT_QUOTA_5H_USD` | `0` | 工作会话默认 5 小时 USD 额度；`0` 表示不限量。用户管理页「默认额度」配置后优先于该值 |
+| `DEFAULT_QUOTA_7D_USD` | `0` | 工作会话默认 7 天 USD 额度；`0` 表示不限量。用户管理页「默认额度」配置后优先于该值 |
+| `QUOTA_USAGE_EVENT_RETENTION_DAYS` | `30` | 工作额度用量明细保留天数；`0` 表示不自动清理 |
 
 ## 其他
 
