@@ -153,6 +153,21 @@ docker compose up -d --force-recreate chatgpt-share-server
 
 > 该开关只影响会话访问校验；定时任务仍有独立的归属校验。`
 
+### 会话用量估算
+
+新版管理后台首页新增“会话用量”入口，按本地保存的会话历史估算工作会话的 token 和费用：
+
+- 只统计工作 UI 产生的 `tpp` / `flora` 会话，普通聊天不计入
+- 价格目录使用与 sub2api 相同的 LiteLLM 镜像；默认从
+  `Wei-Shaw/model-price-repo` 同步，远程不可用时使用镜像内置快照
+- 可通过 `CONVERSATION_USAGE_PRICING_URL` 覆盖价格 JSON 地址
+- 结果包含输入/输出 token、总 token 和估算 USD 费用
+- 系统每 10 分钟补算最近工作会话，也可在后台手动“重新计算全部”
+- 这是本地历史估算，不包含系统提示词、工具 schema、图片、缓存命中和隐藏推理；
+  不能当作上游官方账单
+
+无需额外服务。价格快照已包含在镜像中，升级后直接使用。
+
 ### 对外暴露面
 
 管理后台（`8300/xyhelper`）与库文件清理管理页（`9900/gpt.html`）都**没有额外的身份
