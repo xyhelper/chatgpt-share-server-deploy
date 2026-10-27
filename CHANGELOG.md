@@ -79,6 +79,9 @@
   会话从列表消失。
 - **置顶聊天打开空白**：普通聊天不再返回空 `gizmo_id`，避免前端生成 `/g/c/<id>`
   错误路由；置顶项现在跳到正确的 `/c/<id>`。
+- **Library 文件下载**：直连 openai-proxy 时，`libfile_...`（如“下载Word初稿”）
+  改由 iOS 上游 `download_url` 转换为同源 `/backend-api/estuary/content`；
+  web-ui 增加 `/api/library/*` 代理。普通 `file_...` 附件下载不变。
 - **Binlog 管理（第一阶段）**：数据库维护新增 binlog 状态、文件范围、总大小、
   从库数量和自动保留天数；支持设置 `binlog_expire_logs_seconds`，不执行 PURGE。
 - **conversation_origin 补写**：发送和新会话占位时写入聊天/工作来源，仅在值变化时
