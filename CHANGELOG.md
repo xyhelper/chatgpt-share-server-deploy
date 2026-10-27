@@ -82,6 +82,9 @@
 - **Library 文件下载**：直连 openai-proxy 时，`libfile_...`（如“下载Word初稿”）
   改由 iOS 上游 `download_url` 转换为同源 `/backend-api/estuary/content`；
   web-ui 增加 `/api/library/*` 代理。普通 `file_...` 附件下载不变。
+- **跨车 Library 下载**：移除 share 的 Library 归属校验；Library 链接携带
+  `conversation_id`，按会话所属车解析账号，登录其他车时也能下载；web-ui 改为
+  直接走内容下载接口，不再先打开 Library 页面。
 - **Binlog 管理（第一阶段）**：数据库维护新增 binlog 状态、文件范围、总大小、
   从库数量和自动保留天数；支持设置 `binlog_expire_logs_seconds`，不执行 PURGE。
 - **conversation_origin 补写**：发送和新会话占位时写入聊天/工作来源，仅在值变化时
