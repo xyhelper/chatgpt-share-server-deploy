@@ -17,10 +17,12 @@
 
 ### 升级说明
 
-- 本次更新 web-ui 与 openai-proxy-pro 镜像，未新增配置项，无需数据库迁移。
-- 升级时先拉取最新镜像，再重启 web-ui 与 openai-proxy-pro 服务。
-- 如果只更新其中一个服务，Pages 实时编辑需要 **web-ui + openai-proxy-pro 同时更新**；
-  只更新 web-ui 仍会连到旧代理而失败。
+- 本次更新 web-ui、chatgpt-share-server 与 openai-proxy-pro 镜像，未新增配置项，
+  无需数据库迁移。
+- 升级时先拉取最新镜像，再重启 web-ui、chatgpt-share-server 与
+  openai-proxy-pro 服务。
+- Pages 实时编辑需要三个服务同时更新：浏览器先连 web-ui，share 转发
+  WebSocket，proxy 再连上游；只更新其中一部分仍会失败。
 
 ## [2026-10-27]
 
